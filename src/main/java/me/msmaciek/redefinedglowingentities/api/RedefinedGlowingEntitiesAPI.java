@@ -17,7 +17,9 @@ import me.msmaciek.redefinedglowingentities.structs.GlowTeamSettings;
 import me.msmaciek.redefinedglowingentities.structs.QReversibleHashMap;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -91,6 +93,8 @@ public class RedefinedGlowingEntitiesAPI {
 
 		PacketEvents.getAPI().getPlayerManager().sendPacket(receiver, teamRemovePacket);
 
+		var color = teamSettings.color.asBungee().getColor();
+
 		var teamCreatePacket = new WrapperPlayServerTeams(
 			Utils.getTeamName(receiver, target.getEntityId()),
 			WrapperPlayServerTeams.TeamMode.CREATE,
@@ -100,7 +104,7 @@ public class RedefinedGlowingEntitiesAPI {
 				Component.empty(),
 				WrapperPlayServerTeams.NameTagVisibility.fromID(teamSettings.nametagVisibility.name()),
 				WrapperPlayServerTeams.CollisionRule.fromID(teamSettings.collisionRule.name()),
-				teamSettings.color,
+				NamedTextColor.nearestTo(TextColor.color(color.getRed(), color.getGreen(), color.getBlue())),
 				WrapperPlayServerTeams.OptionData.NONE
 			),
 			List.of(entityTeamId)
@@ -110,7 +114,7 @@ public class RedefinedGlowingEntitiesAPI {
 	}
 
 	//#region properties
-	public void setGlowing(Player receiver, Entity target, NamedTextColor color) {
+	public void setGlowing(Player receiver, Entity target, ChatColor color) {
 		setTeamSettingsIfAbsent(receiver, target);
 		getEntityData(receiver.getUniqueId(), target.getEntityId()).color = color;
 		getEntityData(receiver.getUniqueId(), target.getEntityId()).glowingEnabled = true;
@@ -122,7 +126,7 @@ public class RedefinedGlowingEntitiesAPI {
 		if(getEntityData(receiver.getUniqueId(), target.getEntityId()) == null)
 			return;
 
-		getEntityData(receiver.getUniqueId(), target.getEntityId()).color = NamedTextColor.WHITE;
+		getEntityData(receiver.getUniqueId(), target.getEntityId()).color = ChatColor.WHITE;
 		getEntityData(receiver.getUniqueId(), target.getEntityId()).glowingEnabled = false;
 		resendTeam(receiver, target);
 
@@ -148,7 +152,7 @@ public class RedefinedGlowingEntitiesAPI {
 			resendEntityMetadata(receiver, target);
 	}
 
-	public void setGlowingColor(Player receiver, Entity target, NamedTextColor color) {
+	public void setGlowingColor(Player receiver, Entity target, ChatColor color) {
 		setTeamSettingsIfAbsent(receiver, target);
 		getEntityData(receiver.getUniqueId(), target.getEntityId()).color = color;
 		resendTeam(receiver, target);
